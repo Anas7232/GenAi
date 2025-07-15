@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for SonarCloud analysis
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -46,7 +48,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Required for SonarCloud to properly analyze the project
+          fetch-depth: 0
 
       - name: Download coverage artifacts
         uses: actions/download-artifact@v4
@@ -54,12 +56,19 @@ jobs:
           name: coverage-report
           path: coverage/
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+      - name: Setup Java (required for SonarScanner)
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Run SonarCloud Analysis
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed for PR decoration
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          project-base-dir: ./
           args: >
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
@@ -68,6 +77,8 @@ jobs:
             -Dsonar.coverage.exclusions=**/test/**,**/mock/**
             -Dsonar.scm.provider=git
             -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.projectName=${{ github.repository }}
+            -Dsonar.projectVersion=1.0.${{ github.run_number }}
 
   codeql:
     needs: generate-tests
