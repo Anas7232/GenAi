@@ -11,30 +11,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # Updated to v4
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'  # Added caching for faster installs
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci  # Changed from install to ci for reproducible builds
+        run: npm ci
 
       - name: Generate test cases using GenAI
         run: node scripts/generate-tests.js
 
-      - name: Fix Jest permissions  # Critical fix for permission issues
+      - name: Fix Jest permissions
         run: chmod +x node_modules/.bin/jest
 
       - name: Run tests and generate coverage
         run: npm test
         env:
-          CI: true  # Important for test runners
+          CI: true
 
-      - name: Upload coverage artifacts  # Added to preserve coverage reports
-        uses: actions/upload-artifact@v3
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4  # Updated from v3 to v4
         with:
           name: coverage-report
           path: coverage/
@@ -44,10 +44,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # Also updated to v4 for consistency
 
-      - name: Download coverage artifacts  # Added to get coverage data
-        uses: actions/download-artifact@v3
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4  # Updated from v3 to v4
         with:
           name: coverage-report
           path: coverage/
@@ -55,7 +55,7 @@ jobs:
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Added for better integration
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host-url: ${{ secrets.SONAR_HOST_URL }}
           token: ${{ secrets.SONAR_TOKEN }}
@@ -71,12 +71,12 @@ jobs:
       security-events: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-
+        uses: actions/checkout@v4  # Updated to v4
+      
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
           languages: javascript
-
+      
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
