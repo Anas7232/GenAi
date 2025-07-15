@@ -63,11 +63,12 @@ jobs:
           java-version: '17'
 
       - name: Run SonarCloud Analysis
-        uses: SonarSource/sonarqube-scan-action@v5.0.0
+        uses: SonarSource/sonarcloud-github-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          projectBaseDir: ./
           args: >
             -Dsonar.organization=anas7232
             -Dsonar.projectKey=GenAi
