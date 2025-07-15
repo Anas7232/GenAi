@@ -11,21 +11,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # Updated to v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'  # Added caching for faster installs
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci  # Changed from install to ci for reproducible builds
 
       - name: Generate test cases using GenAI
         run: node scripts/generate-tests.js
 
+      - name: Fix Jest permissions  # Critical fix for permission issues
+        run: chmod +x node_modules/.bin/jest
+
       - name: Run tests and generate coverage
         run: npm test
+        env:
+          CI: true  # Important for test runners
+
+      - name: Upload coverage artifacts  # Added to preserve coverage reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage/
 
   sonarcloud:
     needs: generate-tests
@@ -34,11 +46,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Download coverage artifacts  # Added to get coverage data
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage/
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Added for better integration
         with:
           host-url: ${{ secrets.SONAR_HOST_URL }}
           token: ${{ secrets.SONAR_TOKEN }}
+          extra-properties: |
+            sonar.javascript.lcov.reportPaths=coverage/lcov.info
 
   codeql:
     needs: generate-tests
