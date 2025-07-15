@@ -63,15 +63,14 @@ jobs:
           java-version: '17'
 
       - name: Run SonarCloud Analysis
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          projectBaseDir: ./
           args: >
             -Dsonar.organization=anas7232
-            -Dsonar.projectKey=GenAi
+            -Dsonar.projectKey=Anas7232_GenAi
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.coverage.exclusions=**/test/**,**/mock/**
