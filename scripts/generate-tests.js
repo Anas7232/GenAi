@@ -1,3 +1,5 @@
+console.log("📦 Running generate-tests.js script...");
+
 const fs = require("fs");
 
 const content = `
